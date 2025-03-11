@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FocusPilot</title>
+  <link rel="stylesheet" href="styles.css">
+  <!-- Add Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <noscript>Your browser does not support JavaScript, which is required for full functionality of this web-app.</noscript>
+  
+  <!-- Top Bar -->
+  <header class="top-bar">
+    <div class="logo-container">
+      <svg viewBox="0 0 320 512" width="30" height="30" class="logo-icon">
+        <path fill="currentColor" d="M296 160H180.6l42.6-129.8C227.2 15 215.7 0 200 0H56C44 0 33.8 8.9 32.2 20.8l-32 240C-1.7 275.2 9.5 288 24 288h118.7L96.6 482.5c-3.6 15.2 8 29.5 23.3 29.5 8.4 0 16.4-4.4 20.8-12l176-304c9.3-15.9-2.2-36-20.7-36z"/>
+      </svg>
+      <span class="logo-text">FocusPilot</span>
+    </div>
+    <div class="global-progress">
+      <div class="progress-bar">
+        <div class="progress-fill"></div>
+      </div>
+      <span class="progress-text">0% Complete</span>
+    </div>
+    <div class="stats">
+      <div class="streak">🔥 Streak: 3</div>
+      <div class="gems">💎 XP: 50</div>
+      <div class="level">⭐ Level: 1</div>
+      <button id="profile-btn" class="profile-btn">👤 Profile</button>
+      <button class="toggle-mode">🌙</button>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="kanban-container">
+    <h1 class="title">Your Tasks</h1>
+    <div class="kanban-board">
+      <!-- To-Do Column -->
+      <div class="kanban-column" id="backlog">
+        <h2>To-Do</h2>
+        <div class="task-list"></div>
+      </div>
+      <!-- In Progress Column -->
+      <div class="kanban-column" id="doing">
+        <h2>In Progress</h2>
+        <div class="task-list"></div>
+      </div>
+      <!-- Completed Column -->
+      <div class="kanban-column" id="done">
+        <h2>Completed</h2>
+        <div class="task-list"></div>
+      </div>
+    </div>
+
+    <!-- Habit Tracker -->
+    <section class="habit-tracker">
+      <h2>Daily Habits</h2>
+      <div class="habit-list">
+        <div class="habit">
+          <input type="checkbox" id="habit1">
+          <label for="habit1">Drink Water</label>
+        </div>
+        <div class="habit">
+          <input type="checkbox" id="habit2">
+          <label for="habit2">Exercise</label>
+        </div>
+        <button class="add-habit">➕ Add Habit</button>
+      </div>
+    </section>
+
+    <!-- AI Suggestions -->
+    <section class="ai-suggestions">
+      <h2>AI Suggestions</h2>
+      <div class="suggestion-list">
+        <p>How about: <span class="suggestion-text">Write a report</span></p>
+        <button class="accept-suggestion">✅ Accept</button>
+        <button class="reject-suggestion">❌ Reject</button>
+      </div>
+    </section>
+
+    <!-- Analytics -->
+    <section class="analytics">
+      <h2>Productivity Analytics</h2>
+      <canvas id="productivityChart">
+        Your browser does not support the canvas element.
+      </canvas>
+    </section>
+  </main>
+
+  <!-- Floating Task Control Buttons -->
+  <div class="floating-controls">
+    <button class="focus-btn add-task" title="Add Task">
+      <img src="https://img.icons8.com/?size=100&id=1501&format=png" alt="Add Task Icon"/>
+    </button>
+    <button class="focus-btn schedule-task" title="Schedule Task">
+      <img src="https://img.icons8.com/?size=100&id=3524&format=png" alt="Schedule Task Icon"/>
+    </button>
+    <button class="focus-btn pomodoro" title="Hyper-Focus">
+      <img src="https://img.icons8.com/?size=48&id=3917&format=png" alt="Hyper-Focus Icon"/>
+    </button>
+  </div>
+
+  <!-- Pomodoro Timer -->
+  <div class="pomodoro-container">
+    <h1>Hyper-Focus Mode</h1>
+    <div class="timer">25:00</div>
+    <div class="circle-progress"></div>
+    <!-- Duration Tabs -->
+    <div class="duration-tabs">
+      <button class="duration-tab" data-duration="900">15 mins</button>
+      <button class="duration-tab active" data-duration="1500">25 mins</button>
+      <input type="number" id="custom-duration" min="5" max="120" placeholder="Custom (mins)"/>
+      <button id="set-custom-duration">✔️</button>
+    </div>
+    <div class="controls">
+      <button class="start-btn">▶️</button>
+      <button class="pause-btn">⏸️</button>
+      <button class="reset-btn">🔄</button>
+    </div>
+    <button class="back-btn">← Back to Tasks</button>
+  </div>
+
+  <!-- Profile Modal -->
+  <div id="profile-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <span class="close-btn" role="button" tabindex="0" aria-label="Close Profile Modal">&times;</span>
+      <h2>Profile</h2>
+      <button id="login-btn">Login</button>
+      <form id="profile-form">
+        <h3>Create Profile</h3>
+        <label for="email">Email ID:</label>
+        <input type="email" id="email" name="email" required placeholder="Enter your email"/>
+        <label for="password">Create Password:</label>
+        <input type="password" id="password" name="password" required placeholder="Create a password"/>
+        <button type="submit">Sign Up</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Task Details Modal -->
+  <div class="task-modal" style="display: none;">
+    <div class="task-details">
+      <h3>Task Details</h3>
+      <p>Priority: <span class="detail-priority"></span></p>
+      <p>Deadline: <span class="detail-deadline"></span></p>
+      <p>Created: <span class="detail-created"></span></p>
+      <button class="close-details" role="button" tabindex="0">Close</button>
+    </div>
+  </div>
+
+  <!-- Task Creation Modal -->
+  <div id="task-creation-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <span class="close-btn" role="button" tabindex="0" aria-label="Close Task Creation Modal">&times;</span>
+      <h2>Create New Task</h2>
+      <form id="task-creation-form">
+        <!-- Task Name -->
+        <label for="task-name">Task Name:</label>
+        <input type="text" id="task-name" name="task-name" required placeholder="Enter task name"/>
+
+        <!-- Priority -->
+        <label for="task-priority">Priority:</label>
+        <select id="task-priority" name="task-priority" required>
+          <option value="high">High</option>
+          <option value="medium">Medium</option>
+          <option value="low">Low</option>
+        </select>
+
+        <!-- Deadline -->
+        <label for="task-deadline">Deadline:</label>
+        <input type="datetime-local" id="task-deadline" name="task-deadline" required/>
+
+        <!-- Sub-Tasks -->
+        <label>Sub-Tasks:</label>
+        <div id="sub-tasks-container">
+          <div class="sub-task">
+            <input type="text" class="sub-task-input" placeholder="Enter sub-task"/>
+            <button type="button" class="remove-sub-task">🗑️</button>
+          </div>
+        </div>
+        <button type="button" id="add-sub-task">➕ Add Sub-Task</button>
+
+        <!-- Submit Button -->
+        <button type="submit">Create Task</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Focus Music Modal -->
+  <div id="focus-music-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <span class="close-btn" role="button" tabindex="0" aria-label="Close Focus Music Modal">&times;</span>
+      <h2>Focus Music</h2>
+      <div class="music-options">
+        <button class="music-option" data-src="lofi-beats.mp3">🎵 Lo-Fi Beats</button>
+        <button class="music-option" data-src="rain-sounds.mp3">🌧️ Rain Sounds</button>
+        <button class="music-option" data-src="forest-sounds.mp3">🌲 Forest Sounds</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
